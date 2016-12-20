@@ -17,7 +17,7 @@ func CmdSwitch(c *cli.Context) error {
 		return errors.New("Route table ID and VIP are required")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	routeTableId := c.Args()[0]
