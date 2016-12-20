@@ -37,7 +37,7 @@ func CmdSwitch(c *cli.Context) error {
 	}
 
 	routeTableCli := aws.NewRouteTableClient()
-	routeTableCli.DescribeRouteTables()
+	routeTableCli.DescribeRouteTables(ctx)
 	// vip の存在の確認, バリデーション
 	// instance_id の存在確認
 	// route table の

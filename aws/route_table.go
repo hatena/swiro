@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"log"
 	"os"
+	"context"
 )
 
 type RouteTableClient struct {
@@ -28,13 +29,12 @@ func NewRouteTableClient() *RouteTableClient {
 	return &RouteTableClient{ec2Svc: ec2Svc}
 }
 
-func (c *RouteTableClient) DescribeRouteTables() {
-	res, err := c.ec2Svc.DescribeRouteTables(nil)
-	if err != nil || len(res.RouteTables) < 1 {
-		//return nil, err
-		fmt.Println(err)
-		return
+func (c *RouteTableClient) DescribeRouteTables(ctx context.Context) {
+	req, resp := c.ec2Svc.DescribeRouteTablesRequest(nil)
+	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
+	if err := req.Send(); err != nil || len(resp.RouteTables) < 1 {
+		fmt.Fprintln(os.Stderr, err)
 	}
 
-	fmt.Println(res.RouteTables)
+	fmt.Println(resp)
 }
