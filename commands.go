@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli"
 	"github.com/taku-k/swiro/command"
+	"github.com/urfave/cli"
 )
 
 var GlobalFlags = []cli.Flag{}
@@ -15,7 +15,7 @@ var Commands = []cli.Command{
 		Name:   "switch",
 		Usage:  "",
 		Action: command.CmdSwitch,
-		Flags:  []cli.Flag{
+		Flags: []cli.Flag{
 			cli.StringFlag{Name: "I, instance-id", Usage: "instance id"},
 			cli.IntFlag{Name: "n, max-attempts", Value: 10, Usage: "the maximum number of attempts to poll replacing route (default: 10)"},
 			cli.IntFlag{Name: "i, interval", Value: 2, Usage: "the interval in seconds to poll replacing route (default: 2)"},

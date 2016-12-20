@@ -1,25 +1,40 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"os"
-	"github.com/ktakuya/aptly/_vendor/src/github.com/mitchellh/goamz/ec2"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"log"
+	"os"
 )
 
 type RouteTableClient struct {
-	svc ec2iface.EC2API
+	ec2Svc ec2iface.EC2API
 }
 
 func NewRouteTableClient() *RouteTableClient {
-	session := session.New()
+	sess, err := session.NewSession()
+	if err != nil {
+		log.Fatal("Creating session is failed")
+	}
 	region := os.Getenv("AWS_REGION")
 	if region == "" {
-		region, _ = NewMetaDataClientFromSession(session).GetRegion()
+		region, _ = NewMetaDataClientFromSession(sess).GetRegion()
 	}
-	svc := ec2.New(session, &aws.Config{Region: aws.String(region)})
+	ec2Svc := ec2.New(sess, aws.NewConfig().WithRegion("ap-northeast-1"))
 
-	return &RouteTableClient{svc: svc}
+	return &RouteTableClient{ec2Svc: ec2Svc}
 }
 
+func (c *RouteTableClient) DescribeRouteTables() {
+	res, err := c.ec2Svc.DescribeRouteTables(nil)
+	if err != nil || len(res.RouteTables) < 1 {
+		//return nil, err
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(res.RouteTables)
+}
