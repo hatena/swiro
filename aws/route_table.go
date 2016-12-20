@@ -1,14 +1,13 @@
 package aws
 
 import (
-	"fmt"
+	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	"log"
 	"os"
-	"context"
 )
 
 type RouteTableClient struct {
@@ -29,12 +28,26 @@ func NewRouteTableClient() *RouteTableClient {
 	return &RouteTableClient{ec2Svc: ec2Svc}
 }
 
-func (c *RouteTableClient) DescribeRouteTables(ctx context.Context) {
+func (c *RouteTableClient) DescribeRouteTables(ctx context.Context) ([]*ec2.RouteTable, error) {
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(nil)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	if err := req.Send(); err != nil || len(resp.RouteTables) < 1 {
-		fmt.Fprintln(os.Stderr, err)
+		return nil, err
 	}
 
-	fmt.Println(resp)
+	return resp.RouteTables, nil
+}
+
+func (c *RouteTableClient) DescribeRouteTableById(ctx context.Context, routeTableId string) (*ec2.RouteTable, error) {
+	req, resp := c.ec2Svc.DescribeRouteTablesRequest(&ec2.DescribeRouteTablesInput{
+		RouteTableIds: []*string{
+			aws.String(routeTableId),
+		},
+	})
+	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
+	if err := req.Send(); err != nil || len(resp.RouteTables) < 1 {
+		return nil, err
+	}
+
+	return resp.RouteTables[0], nil
 }
