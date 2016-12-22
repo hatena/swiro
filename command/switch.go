@@ -14,16 +14,16 @@ import (
 func CmdSwitch(c *cli.Context) error {
 	if c.NArg() < 2 {
 		cli.ShowCommandHelp(c, "switch")
-		return errors.New("Route table ID and VIP are required")
+		return errors.New("Route table ID or Name and VIP are required")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	routeTableId := c.Args()[0]
+	key := c.Args()[0]
 	vip := c.Args()[1]
 
-	if !prompter.YN("Switch the following VIP in the route table.\n  "+vip+"("+routeTableId+")\nAre you sure?", true) {
+	if !prompter.YN("Switch the following VIP in the route table.\n  "+vip+"("+key+")\nAre you sure?", true) {
 		fmt.Fprintln(os.Stderr, "Switching is canceled")
 		return nil
 	}
@@ -36,12 +36,11 @@ func CmdSwitch(c *cli.Context) error {
 		}
 	}
 
-	routeTableCli := aws.NewRouteTableClient()
-	routeTables, err := routeTableCli.DescribeRouteTables(ctx)
+	routeTable, err := aws.NewRouteTable(ctx, key)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(os.Stdout, routeTables)
+	fmt.Fprintln(os.Stdout, routeTable)
 	// vip の存在の確認, バリデーション
 	// instance_id の存在確認
 	// route table の
