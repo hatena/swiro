@@ -2,14 +2,14 @@ package aws
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"strings"
-	"errors"
 	"time"
 )
 
-const timeOut = 3*time.Second
+const timeOut = 3 * time.Second
 
 type RouteTable struct {
 	table *ec2.RouteTable
@@ -18,13 +18,13 @@ type RouteTable struct {
 
 type Ec2Meta struct {
 	Name string
-	Id string
+	Id   string
 }
 
 func NewRouteTables() ([]*RouteTable, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
-	
+
 	cli := newEc2Client()
 	ec2Tables, err := cli.getRouteTables(ctx)
 	if err != nil {

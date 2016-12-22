@@ -144,7 +144,7 @@ func (c *Ec2Client) getInstanceId(ctx context.Context, key string) (string, erro
 }
 
 func (c *Ec2Client) getInstanceNameById(ctx context.Context, instanceId string) (string, error) {
-	instance, err := c.getInstanceByKey(ctx,instanceId)
+	instance, err := c.getInstanceByKey(ctx, instanceId)
 	if err != nil {
 		return "", err
 	}
