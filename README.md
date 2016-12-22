@@ -21,9 +21,9 @@ $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 Switch the route below setting:
 ============================================
 Route Table: route_table_name (rtb-xxxxxx)
-Virtual IP:  10.0.0.1 -------- Src:  src_instance_name (i-xxxxxx)
+Virtual IP:  10.0.0.1 -------- Src:  src_instance_name (i-yyyyyy)
                       \\
-                       ======> Dest: dest_instance_name (i-xxxxxx)
+                       ======> Dest: i-xxxxxx
 ============================================
 Are you sure? (y/n) [y]: y
 Success!!
