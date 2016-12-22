@@ -1,8 +1,12 @@
 package command
 
-import "github.com/urfave/cli"
+import (
+	"github.com/urfave/cli"
+	"fmt"
+	"os"
+)
 
 func CmdList(c *cli.Context) error {
-	// Write your code here
+	fmt.Fprintln(os.Stderr, "Not implemented")
 	return nil
 }
