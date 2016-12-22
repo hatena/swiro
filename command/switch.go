@@ -1,14 +1,13 @@
 package command
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/Songmu/prompter"
 	"github.com/taku-k/swiro/aws"
 	"github.com/urfave/cli"
 	"os"
-	"time"
+	"strings"
 )
 
 func CmdSwitch(c *cli.Context) error {
@@ -17,30 +16,43 @@ func CmdSwitch(c *cli.Context) error {
 		return errors.New("Route table ID or Name and VIP are required")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
 	key := c.Args()[0]
 	vip := c.Args()[1]
 
-	if !prompter.YN("Switch the following VIP in the route table.\n  "+vip+"("+key+")\nAre you sure?", true) {
-		fmt.Fprintln(os.Stderr, "Switching is canceled")
-		return nil
-	}
-
-	var instanceId string
-	if instanceId = c.String("instance-id"); instanceId == "" {
+	var instanceKey string
+	if instanceKey = c.String("instance-id"); instanceKey == "" {
 		var err error
-		if instanceId, err = aws.NewMetaDataClient().GetInstanceID(); err != nil {
+		if instanceKey, err = aws.NewMetaDataClient().GetInstanceID(); err != nil {
 			return err
 		}
 	}
 
-	routeTable, err := aws.NewRouteTable(ctx, key)
+	routeTable, err := aws.NewRouteTable(key)
 	if err != nil {
 		return err
 	}
-	err = routeTable.ReplaceRoute(ctx, vip, instanceId)
+
+	promptStr := `Switch the route below setting:
+============================================
+Route Table: %s (%s)
+Virtual IP:  %s -------- Src:  %s (%s)
+             %s \\
+             %s  ======> Dest: %s
+============================================
+Are you sure?`
+	routeTableName := routeTable.GetRouteTableName()
+	routeTableId := routeTable.GetRouteTableId()
+	srcInstance, err := routeTable.GetSrcInstanceByVip(vip)
+	if err != nil {
+		return err
+	}
+	ws := strings.Repeat(" ", len(vip))
+	if !prompter.YN(fmt.Sprintf(promptStr, routeTableName, routeTableId, vip, srcInstance.Name, srcInstance.Id, ws, ws, instanceKey), true) {
+		fmt.Fprintln(os.Stderr, "Switching is canceled")
+		return nil
+	}
+
+	err = routeTable.ReplaceRoute(vip, instanceKey)
 	if err != nil {
 		return err
 	}

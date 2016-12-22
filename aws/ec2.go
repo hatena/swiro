@@ -94,36 +94,64 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, routeTableId, destinationC
 	return nil
 }
 
-func (c *Ec2Client) getInstanceId(ctx context.Context, instance string) (string, error) {
-	if strings.HasPrefix(instance, "i-") {
-		return instance, nil
+func (c *Ec2Client) getInstanceByKey(ctx context.Context, key string) (*ec2.Instance, error) {
+	var input *ec2.DescribeInstancesInput
+	if strings.HasPrefix(key, "i-") {
+		input = &ec2.DescribeInstancesInput{
+			InstanceIds: []*string{
+				aws.String(key),
+			},
+		}
+	} else {
+		input = &ec2.DescribeInstancesInput{
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("tag-key"),
+					Values: []*string{
+						aws.String("Name"),
+					},
+				},
+				{
+					Name: aws.String("tag-value"),
+					Values: []*string{
+						aws.String(key),
+					},
+				},
+			},
+		}
 	}
 
-	req, resp := c.ec2Svc.DescribeInstancesRequest(&ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			{
-				Name: aws.String("tag-key"),
-				Values: []*string{
-					aws.String("Name"),
-				},
-			},
-			{
-				Name: aws.String("tag-value"),
-				Values: []*string{
-					aws.String(instance),
-				},
-			},
-		},
-	})
+	req, resp := c.ec2Svc.DescribeInstancesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	err := req.Send()
 	switch {
 	case err != nil:
-		return "", err
+		return nil, err
 	case len(resp.Reservations) == 0:
-		return "", errors.New("Given instance is not found")
+		return nil, errors.New("Given instance is not found")
 	case len(resp.Reservations[0].Instances) != 1:
-		return "", errors.New("Too much instances are fetched")
+		return nil, errors.New("Too much instances are fetched")
 	}
-	return *resp.Reservations[0].Instances[0].InstanceId, nil
+	return resp.Reservations[0].Instances[0], nil
+}
+
+func (c *Ec2Client) getInstanceId(ctx context.Context, key string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx, key)
+	if err != nil {
+		return "", err
+	}
+	return *instance.InstanceId, nil
+}
+
+func (c *Ec2Client) getInstanceNameById(ctx context.Context, instanceId string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx,instanceId)
+	if err != nil {
+		return "", err
+	}
+	for _, tag := range instance.Tags {
+		if *tag.Key == "Name" {
+			return *tag.Value, nil
+		}
+	}
+	return "", nil
 }
