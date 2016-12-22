@@ -10,14 +10,14 @@ It is possible to perform failover (switching of the connection destination) of 
 * Switching routes
 
 ```
-$ swiro switch rtb-xxxxxx 10.0.0.1 -I i-xxxxxx
+$ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 ```
 
 
 ## Example
 
 ```
-$ swiro switch rtb-xxxxxx 10.0.0.1 -I i-xxxxxx
+$ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 Switch the route below setting:
 ============================================
 Route Table: route_table_name (rtb-xxxxxx)

@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Songmu/prompter"
 	"github.com/taku-k/swiro/aws"
@@ -11,16 +10,11 @@ import (
 )
 
 func CmdSwitch(c *cli.Context) error {
-	if c.NArg() < 2 {
-		cli.ShowCommandHelp(c, "switch")
-		return errors.New("Route table ID or Name and VIP are required")
-	}
-
-	key := c.Args()[0]
-	vip := c.Args()[1]
+	key := c.String("route-table")
+	vip := c.String("vip")
 
 	var instanceKey string
-	if instanceKey = c.String("instance-id"); instanceKey == "" {
+	if instanceKey = c.String("instance"); instanceKey == "" {
 		var err error
 		if instanceKey, err = aws.NewMetaDataClient().GetInstanceID(); err != nil {
 			return err
