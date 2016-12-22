@@ -1,10 +1,32 @@
 # swiro
 
+swiro is a switching route tool for AWS to realize VIP (Virtual IP) with Routing-Based High Availability pattern.
+It is possible to perform failover (switching of the connection destination) of the EC2 redundant across the subnet (AZ).
 
-
-## Description
 
 ## Usage
+
+* Switching routes
+
+```
+$ swiro switch rtb-xxxxxx 10.0.0.1 -I i-xxxxxx
+```
+
+
+## Example
+
+```
+$ swiro switch rtb-xxxxxx 10.0.0.1 -I i-xxxxxx
+Switch the route below setting:
+============================================
+Route Table: route_table_name (rtb-xxxxxx)
+Virtual IP:  10.0.0.1 -------- Src:  src_instance_name (i-xxxxxx)
+                      \\
+                       ======> Dest: dest_instance_name (i-xxxxxx)
+============================================
+Are you sure? (y/n) [y]: y
+Success!!
+```
 
 ## Install
 

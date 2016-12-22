@@ -56,6 +56,7 @@ Are you sure?`
 	if err != nil {
 		return err
 	}
+	fmt.Fprintln(os.Stdout, "Success!!")
 
 	return nil
 }
