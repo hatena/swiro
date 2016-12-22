@@ -2,7 +2,7 @@
 
 swiro is a switching route tool for AWS to realize VIP (Virtual IP) with Routing-Based High Availability pattern.
 
-It is possible to perform failover (switching of the connection destination) of the EC2 redundant across the subnet (AZ).
+This pattern is possible to perform failover (switching of the connection destination) of the EC2 redundant across the subnet (AZ).
 
 
 ## Usage
