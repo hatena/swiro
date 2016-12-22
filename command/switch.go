@@ -36,16 +36,14 @@ func CmdSwitch(c *cli.Context) error {
 		}
 	}
 
-	var routeTable *aws.RouteTable
-	var err error
-	if routeTable, err = aws.NewRouteTable(ctx, key); err != nil {
+	routeTable, err := aws.NewRouteTable(ctx, key)
+	if err != nil {
 		return err
 	}
-	if err = routeTable.ReplaceRoute(ctx, vip, instanceId); err != nil {
+	err = routeTable.ReplaceRoute(ctx, vip, instanceId)
+	if err != nil {
 		return err
 	}
-	// vip の存在の確認, バリデーション
-	// instance_id の存在確認
-	// route table の
+
 	return nil
 }
