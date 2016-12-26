@@ -16,6 +16,8 @@ $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 
 ## Example
 
+In most cases you can switch the routing with the Route Table ID as follows:
+
 ```
 $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 Switch the route below setting:
@@ -27,6 +29,12 @@ Virtual IP:  10.0.0.1 -------- Src:  src_instance_name (i-yyyyyy)
 ============================================
 Are you sure? (y/n) [y]: y
 Success!!
+```
+
+You can also switch by specifying Route Table Name instead of Route Table ID.
+
+```
+$ swiro switch -r route_table_name -v 10.0.0.1 -I instance_name
 ```
 
 ## Install
