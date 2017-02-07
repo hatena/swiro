@@ -30,7 +30,7 @@ func NewRouteTables() ([]*RouteTable, error) {
 	if err != nil {
 		return nil, err
 	}
-	tables := make([]*RouteTable, 0)
+	tables := make([]*RouteTable, 0, len(ec2Tables))
 	for _, t := range ec2Tables {
 		tables = append(tables, &RouteTable{table: t, cli: cli})
 	}
