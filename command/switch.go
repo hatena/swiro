@@ -12,6 +12,7 @@ import (
 func CmdSwitch(c *cli.Context) error {
 	key := c.String("route-table")
 	vip := c.String("vip")
+	force := c.Bool("force")
 
 	var instanceKey string
 	if instanceKey = c.String("instance"); instanceKey == "" {
@@ -33,7 +34,7 @@ Virtual IP:  %s -------- Src:  %s (%s)
              %s \\
              %s  ======> Dest: %s
 ============================================
-Are you sure?`
+`
 	routeTableName := routeTable.GetRouteTableName()
 	routeTableId := routeTable.GetRouteTableId()
 	srcInstance, err := routeTable.GetSrcInstanceByVip(vip)
@@ -41,7 +42,8 @@ Are you sure?`
 		return err
 	}
 	ws := strings.Repeat(" ", len(vip))
-	if !prompter.YN(fmt.Sprintf(promptStr, routeTableName, routeTableId, vip, srcInstance.Name, srcInstance.Id, ws, ws, instanceKey), true) {
+	fmt.Fprintf(os.Stdout, promptStr, routeTableName, routeTableId, vip, srcInstance.Name, srcInstance.Id, ws, ws, instanceKey)
+	if !force && !prompter.YN("Are you sure?", false) {
 		fmt.Fprintln(os.Stderr, "Switching is canceled")
 		return nil
 	}
