@@ -68,7 +68,12 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 	return nil
 }
 
-func (t *RouteTable) ListPossibleVip() {}
+func (t *RouteTable) ListPossibleVips() []string {
+	//for _, r := range t.table.Routes {
+	//	if *r.DestinationCidrBlock ==
+	//}
+	return nil
+}
 
 func (t *RouteTable) GetSrcInstanceByVip(vip string) (*Ec2Meta, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
