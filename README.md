@@ -27,10 +27,10 @@ $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 ```
 $ swiro list
 Route Table: route_table_1 (rtb-xxxxxx1)
-Virtual IP:  10.0.0.1/32 =======> src_instance_1 (i-yyyyyy1)
-Virtual IP:  10.0.0.2/32 =======> src_instance_2 (i-yyyyyy2)
+        Virtual IP:  10.0.0.1/32 =======> src_instance_1 (i-yyyyyy1)
+        Virtual IP:  10.0.0.2/32 =======> src_instance_2 (i-yyyyyy2)
 Route Table: route_table_2 (rtb-xxxxxx2)
-Virtual IP:  10.0.0.3/32 =======> src_instance_3 (i-yyyyyy3)
+        Virtual IP:  10.0.0.3/32 =======> src_instance_3 (i-yyyyyy3)
 ```
 
 ### Switching routes
