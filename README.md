@@ -7,6 +7,12 @@ This pattern is possible to perform failover (switching of the connection destin
 
 ## Usage
 
+* List routes
+
+```
+$ swiro list
+```
+
 * Switching routes
 
 ```
@@ -16,14 +22,27 @@ $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 
 ## Example
 
+### List routes
+
+```
+$ swiro list
+Route Table: route_table_1 (rtb-xxxxxx1)
+Virtual IP:  10.0.0.1/32 =======> src_instance_1 (i-yyyyyy1)
+Virtual IP:  10.0.0.2/32 =======> src_instance_2 (i-yyyyyy2)
+Route Table: route_table_2 (rtb-xxxxxx2)
+Virtual IP:  10.0.0.3/32 =======> src_instance_3 (i-yyyyyy3)
+```
+
+### Switching routes
+
 In most cases you can switch the routing with the Route Table ID as follows:
 
 ```
 $ swiro switch -r rtb-xxxxxx -v 10.0.0.1 -I i-xxxxxx
 Switch the route below setting:
 ============================================
-Route Table: route_table_name (rtb-xxxxxx)
-Virtual IP:  10.0.0.1 -------- Src:  src_instance_name (i-yyyyyy)
+Route Table: route_table (rtb-xxxxxx)
+Virtual IP:  10.0.0.1 -------- Src:  src_instance (i-yyyyyy)
                       \\
                        ======> Dest: i-xxxxxx
 ============================================
@@ -34,7 +53,7 @@ Success!!
 You can also switch by specifying Route Table Name instead of Route Table ID.
 
 ```
-$ swiro switch -r route_table_name -v 10.0.0.1 -I instance_name
+$ swiro switch -r route_table -v 10.0.0.1 -I dest_instance
 ```
 
 ## Install
