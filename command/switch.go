@@ -29,12 +29,10 @@ func CmdSwitch(c *cli.Context) error {
 	}
 
 	promptStr := `Switch the route below setting:
-============================================
-Route Table: %s (%s)
-Virtual IP:  %s -------- Src:  %s (%s)
-             %s \\
-             %s  ======> Dest: %s
-============================================
+===> Route Table: %s (%s)
+---> Virtual IP:  %s -------- Src:  %s (%s)
+                  %s \\
+                  %s  ======> Dest: %s
 `
 	routeTableName := routeTable.GetRouteTableName()
 	routeTableId := routeTable.GetRouteTableId()

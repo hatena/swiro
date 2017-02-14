@@ -16,8 +16,8 @@ func (v *MaybeVips) Output() {
 	if len(v.instanceIds) == 0 {
 		return
 	}
-	tmpl := `Route Table: {{.RouteTableName}} ({{.RouteTableId}})
-{{range $i, $vip := .Vips}}	Virtual IP:  {{$vip}} =======> {{index $.Names $i}} ({{index $.InstanceIds $i}})
+	tmpl := `===> Route Table: {{.RouteTableName}} ({{.RouteTableId}})
+{{range $i, $vip := .Vips}}---> Virtual IP:  {{$vip}} =======> {{index $.Names $i}} ({{index $.InstanceIds $i}})
 {{end}}`
 	t := template.New("maybevips")
 	template.Must(t.Parse(tmpl))
