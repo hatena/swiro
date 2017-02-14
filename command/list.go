@@ -1,8 +1,8 @@
 package command
 
 import (
-	"github.com/urfave/cli"
 	"github.com/taku-k/swiro/aws"
+	"github.com/urfave/cli"
 )
 
 func CmdList(c *cli.Context) error {

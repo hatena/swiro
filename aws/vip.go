@@ -23,9 +23,9 @@ func (v *MaybeVips) Output() {
 	template.Must(t.Parse(tmpl))
 	t.Execute(os.Stdout, map[string]interface{}{
 		"RouteTableName": v.table.GetRouteTableName(),
-		"RouteTableId": v.table.GetRouteTableId(),
-		"InstanceIds": v.instanceIds,
-		"Vips": v.vips,
-		"Names": v.names,
+		"RouteTableId":   v.table.GetRouteTableId(),
+		"InstanceIds":    v.instanceIds,
+		"Vips":           v.vips,
+		"Names":          v.names,
 	})
 }
