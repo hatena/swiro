@@ -94,6 +94,19 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, routeTableId, destinationC
 	return nil
 }
 
+func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, routeTableId, dest string) (string, error) {
+	t, err := c.getRouteTableByKey(ctx, routeTableId)
+	if err != nil {
+		return "", err
+	}
+	for _, r := range t.Routes {
+		if *r.DestinationCidrBlock == dest {
+			return *r.InstanceId, nil
+		}
+	}
+	return "", errors.New("Not found")
+}
+
 func (c *Ec2Client) getInstanceByKey(ctx context.Context, key string) (*ec2.Instance, error) {
 	var input *ec2.DescribeInstancesInput
 	if strings.HasPrefix(key, "i-") {

@@ -63,7 +63,13 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 		return err
 	}
 
-	// TODO: check whether the route has actually replaced
+	changed, err := t.cli.getInstanceIdByDest(ctx, routeTableId, destinationCidrBlock)
+	if err != nil {
+		return err
+	}
+	if changed != instanceId {
+		return errors.New("Route has not been replaced yet")
+	}
 
 	return nil
 }
