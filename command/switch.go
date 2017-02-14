@@ -2,11 +2,12 @@ package command
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/Songmu/prompter"
 	"github.com/taku-k/swiro/aws"
 	"github.com/urfave/cli"
-	"os"
-	"strings"
 )
 
 func CmdSwitch(c *cli.Context) error {

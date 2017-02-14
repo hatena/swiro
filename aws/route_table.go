@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 const timeOut = 3 * time.Second
