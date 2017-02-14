@@ -68,11 +68,26 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 	return nil
 }
 
-func (t *RouteTable) ListPossibleVips() []string {
-	//for _, r := range t.table.Routes {
-	//	if *r.DestinationCidrBlock ==
-	//}
-	return nil
+func (t *RouteTable) ListPossibleVips() *MaybeVips {
+	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
+	defer cancel()
+	ids := make([]string, 0, len(t.table.Routes))
+	vips := make([]string, 0, len(t.table.Routes))
+	names := make([]string, 0, len(t.table.Routes))
+	for _, r := range t.table.Routes {
+		if strings.HasSuffix(*r.DestinationCidrBlock, "/32") {
+			if r.InstanceId != nil {
+				ids = append(ids, *r.InstanceId)
+				vips = append(vips, *r.DestinationCidrBlock)
+				name, err := t.cli.getInstanceNameById(ctx, *r.InstanceId)
+				if err != nil {
+					name = "unknown"
+				}
+				names = append(names, name)
+			}
+		}
+	}
+	return &MaybeVips{t, ids, vips, names}
 }
 
 func (t *RouteTable) GetSrcInstanceByVip(vip string) (*Ec2Meta, error) {
