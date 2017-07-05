@@ -118,6 +118,8 @@ func (t *RouteTable) GetSrcByVip(vip string) (*Ec2Meta, error) {
 		if err != nil {
 			return nil, err
 		}
+	default:
+		return nil, errors.New("Not support to switch from neither instance nor ENI destination")
 	}
 	return &Ec2Meta{Name: name, Id: id}, nil
 }
