@@ -169,3 +169,35 @@ func (c *Ec2Client) getInstanceNameById(ctx context.Context, instanceId string) 
 	}
 	return "", nil
 }
+
+func (c *Ec2Client) getENINameById(ctx context.Context, ENIId string) (string, error) {
+	input := &ec2.DescribeNetworkInterfacesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("network-interface-id"),
+				Values: []*string{
+					aws.String(ENIId),
+				},
+			},
+		},
+	}
+
+	req, resp := c.ec2Svc.DescribeNetworkInterfacesRequest(input)
+	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
+	err := req.Send()
+	switch {
+	case err != nil:
+		return "", err
+	case len(resp.NetworkInterfaces) == 0:
+		return "", errors.New("Given interface is not found")
+	case len(resp.NetworkInterfaces) != 1:
+		return "", errors.New("Too much instances are fetched")
+	}
+	eni := resp.NetworkInterfaces[0]
+	for _, tag := range eni.TagSet {
+		if *tag.Key == "Name" {
+			return *tag.Value, nil
+		}
+	}
+	return "", nil
+}
