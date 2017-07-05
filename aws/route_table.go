@@ -101,30 +101,32 @@ func (t *RouteTable) GetSrcByVip(vip string) (*Ec2Meta, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeOut)
 	defer cancel()
 
-	id, err := t.getSrcByVip(vip)
+	id, state, err := t.getSrcByVip(vip)
 	if err != nil {
 		return nil, err
 	}
 
 	var name string
 	switch {
-	case strings.HasPrefix(id, "i-"):
+	case strings.HasPrefix(id, "i-") && state == "active":
 		name, err = t.cli.getInstanceNameById(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-	case strings.HasPrefix(id, "eni-"):
+	case strings.HasPrefix(id, "eni-") && state == "active":
 		name, err = t.cli.getENINameById(ctx, id)
 		if err != nil {
 			return nil, err
 		}
+	case state == "blackhole":
+		name = "blackhole"
 	default:
 		return nil, errors.New("Not support to switch from neither instance nor ENI destination")
 	}
 	return &Ec2Meta{Name: name, Id: id}, nil
 }
 
-func (t *RouteTable) getSrcByVip(vip string) (string, error) {
+func (t *RouteTable) getSrcByVip(vip string) (string, string, error) {
 	vipCidrBlock := vip
 	if !strings.HasSuffix(vipCidrBlock, "/32") {
 		vipCidrBlock = fmt.Sprintf("%s/32", vipCidrBlock)
@@ -133,13 +135,13 @@ func (t *RouteTable) getSrcByVip(vip string) (string, error) {
 		if *route.DestinationCidrBlock == vipCidrBlock {
 			switch {
 			case route.InstanceId != nil && *route.InstanceId != "":
-				return *route.InstanceId, nil
+				return *route.InstanceId, *route.State, nil
 			case route.NetworkInterfaceId != nil && *route.NetworkInterfaceId != "":
-				return *route.NetworkInterfaceId, nil
+				return *route.NetworkInterfaceId, *route.State, nil
 			}
 		}
 	}
-	return "", errors.New("Given vip is not found")
+	return "", "", errors.New("Given vip is not found")
 }
 
 func (t *RouteTable) GetRouteTableId() string {
