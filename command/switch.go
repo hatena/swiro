@@ -36,12 +36,12 @@ func CmdSwitch(c *cli.Context) error {
 `
 	routeTableName := routeTable.GetRouteTableName()
 	routeTableId := routeTable.GetRouteTableId()
-	srcInstance, err := routeTable.GetSrcInstanceByVip(vip)
+	src, err := routeTable.GetSrcByVip(vip)
 	if err != nil {
 		return err
 	}
 	ws := strings.Repeat(" ", len(vip))
-	fmt.Fprintf(os.Stdout, promptStr, routeTableName, routeTableId, vip, srcInstance.Name, srcInstance.Id, ws, ws, instanceKey)
+	fmt.Fprintf(os.Stdout, promptStr, routeTableName, routeTableId, vip, src.Name, src.Id, ws, ws, instanceKey)
 	if !force && !prompter.YN("Are you sure?", false) {
 		fmt.Fprintln(os.Stderr, "Switching is canceled")
 		return nil
