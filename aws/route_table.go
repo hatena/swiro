@@ -108,18 +108,18 @@ func (t *RouteTable) GetSrcByVip(vip string) (*Ec2Meta, error) {
 
 	var name string
 	switch {
-	case strings.HasPrefix(id, "i-") && state == "active":
+	case strings.HasPrefix(id, "i-") && state == ec2.RouteStateActive:
 		name, err = t.cli.getInstanceNameById(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-	case strings.HasPrefix(id, "eni-") && state == "active":
+	case strings.HasPrefix(id, "eni-") && state == ec2.RouteStateActive:
 		name, err = t.cli.getENINameById(ctx, id)
 		if err != nil {
 			return nil, err
 		}
 	case state == "blackhole":
-		name = "blackhole"
+		name = ec2.RouteStateBlackhole
 	default:
 		return nil, errors.New("Not support to switch from neither instance nor ENI destination")
 	}
