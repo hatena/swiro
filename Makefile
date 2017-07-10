@@ -1,5 +1,5 @@
 NAME     := swiro
-VERSION := $(shell git describe --tags --exact-match 2> /dev/null || echo "unknown")
+VERSION := $(shell git describe --tags --exact-match 2> /dev/null || git rev-parse --short HEAD || echo "unknown")
 
 SRCS    := $(shell find . -type f -name '*.go')
 LDFLAGS := -s -w -extldflags "-static"
