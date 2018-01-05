@@ -11,6 +11,7 @@ import (
 )
 
 const timeOut = 3 * time.Second
+const retry = 3
 
 type RouteTable struct {
 	table *ec2.RouteTable
@@ -27,7 +28,7 @@ func NewRouteTables() ([]*RouteTable, error) {
 	defer cancel()
 
 	e := newEc2Client()
-	ec2Tables, err := e.getRouteTables(ctx)
+	ec2Tables, err := e.getRouteTables(ctx, retry)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,7 @@ func NewRouteTable(routeTableKey string) (*RouteTable, error) {
 	defer cancel()
 
 	e := newEc2Client()
-	ec2Table, err := e.getRouteTableByKey(ctx, routeTableKey)
+	ec2Table, err := e.getRouteTableByKey(ctx, retry, routeTableKey)
 	if err != nil {
 		return nil, err
 	}
@@ -56,15 +57,15 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 
 	routeTableId := *t.table.RouteTableId
 	destinationCidrBlock := fmt.Sprintf("%s/32", vip)
-	instanceId, err := t.e.getInstanceId(ctx, instance)
+	instanceId, err := t.e.getInstanceId(ctx, retry, instance)
 	if err != nil {
 		return err
 	}
-	if err = t.e.replaceRoute(ctx, routeTableId, destinationCidrBlock, instanceId); err != nil {
+	if err = t.e.replaceRoute(ctx, retry, routeTableId, destinationCidrBlock, instanceId); err != nil {
 		return err
 	}
 
-	changed, err := t.e.getInstanceIdByDest(ctx, routeTableId, destinationCidrBlock)
+	changed, err := t.e.getInstanceIdByDest(ctx, retry, routeTableId, destinationCidrBlock)
 	if err != nil {
 		return err
 	}
@@ -86,7 +87,7 @@ func (t *RouteTable) ListPossibleVips() *MaybeVips {
 			if r.InstanceId != nil {
 				ids = append(ids, *r.InstanceId)
 				vips = append(vips, *r.DestinationCidrBlock)
-				name, err := t.e.getInstanceNameById(ctx, *r.InstanceId)
+				name, err := t.e.getInstanceNameById(ctx, retry, *r.InstanceId)
 				if err != nil {
 					name = "unknown"
 				}
@@ -109,12 +110,12 @@ func (t *RouteTable) GetSrcByVip(vip string) (*Ec2Meta, error) {
 	var name string
 	switch {
 	case strings.HasPrefix(id, "i-") && state == ec2.RouteStateActive:
-		name, err = t.e.getInstanceNameById(ctx, id)
+		name, err = t.e.getInstanceNameById(ctx, retry, id)
 		if err != nil {
 			return nil, err
 		}
 	case strings.HasPrefix(id, "eni-") && state == ec2.RouteStateActive:
-		name, err = t.e.getENINameById(ctx, id)
+		name, err = t.e.getENINameById(ctx, retry, id)
 		if err != nil {
 			return nil, err
 		}
