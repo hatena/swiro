@@ -31,17 +31,24 @@ func newEc2Client() *Ec2Client {
 	return &Ec2Client{ec2Svc: ec2Svc}
 }
 
-func (c *Ec2Client) getRouteTables(ctx context.Context) ([]*ec2.RouteTable, error) {
+func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.RouteTable, error) {
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(nil)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	if err := req.Send(); err != nil || len(resp.RouteTables) < 1 {
+	var err error
+	for i := 0; i < retry; i++ {
+		err = req.Send()
+		if err == nil {
+			break
+		}
+	}
+	if err != nil || len(resp.RouteTables) < 1 {
 		return nil, err
 	}
 
 	return resp.RouteTables, nil
 }
 
-func (c *Ec2Client) getRouteTableByKey(ctx context.Context, key string) (*ec2.RouteTable, error) {
+func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key string) (*ec2.RouteTable, error) {
 	var input *ec2.DescribeRouteTablesInput
 	if strings.HasPrefix(key, "rtb-") {
 		input = &ec2.DescribeRouteTablesInput{
@@ -70,7 +77,13 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, key string) (*ec2.Ro
 
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	err := req.Send()
+	var err error
+	for i := 0; i < retry; i++ {
+		err := req.Send()
+		if err == nil {
+			break
+		}
+	}
 	switch {
 	case err != nil:
 		return nil, err
@@ -82,21 +95,28 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, key string) (*ec2.Ro
 	return resp.RouteTables[0], nil
 }
 
-func (c *Ec2Client) replaceRoute(ctx context.Context, routeTableId, destinationCidrBlock, instanceId string) error {
+func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, destinationCidrBlock, instanceId string) error {
 	req, _ := c.ec2Svc.ReplaceRouteRequest(&ec2.ReplaceRouteInput{
 		RouteTableId:         aws.String(routeTableId),
 		InstanceId:           aws.String(instanceId),
 		DestinationCidrBlock: aws.String(destinationCidrBlock),
 	})
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	if err := req.Send(); err != nil {
+	var err error
+	for i := 0; i < retry; i++ {
+		err := req.Send()
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, routeTableId, dest string) (string, error) {
-	t, err := c.getRouteTableByKey(ctx, routeTableId)
+func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, retry int, routeTableId, dest string) (string, error) {
+	t, err := c.getRouteTableByKey(ctx, retry, routeTableId)
 	if err != nil {
 		return "", err
 	}
@@ -108,7 +128,7 @@ func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, routeTableId, dest 
 	return "", errors.New("Not found")
 }
 
-func (c *Ec2Client) getInstanceByKey(ctx context.Context, key string) (*ec2.Instance, error) {
+func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string) (*ec2.Instance, error) {
 	var input *ec2.DescribeInstancesInput
 	if strings.HasPrefix(key, "i-") {
 		input = &ec2.DescribeInstancesInput{
@@ -135,9 +155,15 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, key string) (*ec2.Inst
 		}
 	}
 
+	var err error
 	req, resp := c.ec2Svc.DescribeInstancesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	err := req.Send()
+	for i := 0; i < retry; i++ {
+		err := req.Send()
+		if err == nil {
+			break
+		}
+	}
 	switch {
 	case err != nil:
 		return nil, err
@@ -149,16 +175,16 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, key string) (*ec2.Inst
 	return resp.Reservations[0].Instances[0], nil
 }
 
-func (c *Ec2Client) getInstanceId(ctx context.Context, key string) (string, error) {
-	instance, err := c.getInstanceByKey(ctx, key)
+func (c *Ec2Client) getInstanceId(ctx context.Context, retry int, key string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx, retry, key)
 	if err != nil {
 		return "", err
 	}
 	return *instance.InstanceId, nil
 }
 
-func (c *Ec2Client) getInstanceNameById(ctx context.Context, instanceId string) (string, error) {
-	instance, err := c.getInstanceByKey(ctx, instanceId)
+func (c *Ec2Client) getInstanceNameById(ctx context.Context, retry int, instanceId string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx, retry, instanceId)
 	if err != nil {
 		return "", err
 	}
@@ -170,7 +196,7 @@ func (c *Ec2Client) getInstanceNameById(ctx context.Context, instanceId string) 
 	return "", nil
 }
 
-func (c *Ec2Client) getENINameById(ctx context.Context, ENIId string) (string, error) {
+func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string) (string, error) {
 	input := &ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -184,7 +210,13 @@ func (c *Ec2Client) getENINameById(ctx context.Context, ENIId string) (string, e
 
 	req, resp := c.ec2Svc.DescribeNetworkInterfacesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	err := req.Send()
+	var err error
+	for i := 0; i < retry; i++ {
+		err := req.Send()
+		if err == nil {
+			break
+		}
+	}
 	switch {
 	case err != nil:
 		return "", err
