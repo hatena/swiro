@@ -19,8 +19,6 @@ var Commands = []cli.Command{
 			cli.StringFlag{Name: "r, route-table", Usage: "route table id or name"},
 			cli.StringFlag{Name: "v, vip", Usage: "Virtual IP address"},
 			cli.StringFlag{Name: "I, instance", Usage: "instance id or name"},
-			cli.IntFlag{Name: "n, max-attempts", Value: 10, Usage: "the maximum number of attempts to poll replacing route (default: 10)"},
-			cli.IntFlag{Name: "i, interval", Value: 2, Usage: "the interval in seconds to poll replacing route (default: 2)"},
 			cli.BoolFlag{Name: "f, force", Usage: "force switching (default: false"},
 		},
 	},
