@@ -38,3 +38,8 @@ fmt:
 .PHONY: imports
 imports:
 	goimports -w $$(find . -type f -name '*.go' | grep -v -e vendor)
+
+.PHONY: test
+test:
+	go test -v -race $$(go list ./...)
+
