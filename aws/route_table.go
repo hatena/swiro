@@ -83,6 +83,10 @@ func (t *RouteTable) ListPossibleVips() *MaybeVips {
 	vips := make([]string, 0, len(t.table.Routes))
 	names := make([]string, 0, len(t.table.Routes))
 	for _, r := range t.table.Routes {
+		// VPC Endpoint route does not have DestinationCidrBlock field and It can not be modified
+		if r.DestinationCidrBlock == nil {
+			continue
+		}
 		if strings.HasSuffix(*r.DestinationCidrBlock, "/32") {
 			if r.InstanceId != nil {
 				ids = append(ids, *r.InstanceId)
