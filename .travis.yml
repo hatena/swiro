@@ -16,6 +16,7 @@ install:
 - dep ensure
 
 script:
+- make
 - make test
 
 env:
