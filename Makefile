@@ -21,15 +21,15 @@ cross-build: deps
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags '$(LDFLAGS)' -o dist/$(NAME)_windows_amd64.exe
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -a -tags netgo -installsuffix netgo -ldflags '$(LDFLAGS)' -o dist/$(NAME)_windows_386.exe
 
-.PHONY: glide
-glide:
-ifeq ($(shell command -v glide 2> /dev/null),)
-    curl https://glide.sh/get | sh
+.PHONY: dep
+dep:
+ifeq ($(shell command -v dep 2> /dev/null),)
+    go get github.com/golang/dep/cmd/dep
 endif
 
 .PHONY: deps
-deps: glide
-	glide install
+deps: dep
+	dep ensure
 
 .PHONY: fmt
 fmt:
