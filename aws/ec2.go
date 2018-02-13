@@ -37,7 +37,7 @@ func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.Route
 	var err error
 	for i := 0; i < retry; i++ {
 		err = req.Send()
-		if err == nil {
+		if err == nil && len(resp.RouteTables) > 0 {
 			break
 		}
 	}
@@ -80,7 +80,7 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key strin
 	var err error
 	for i := 0; i < retry; i++ {
 		err := req.Send()
-		if err == nil {
+		if err == nil && len(resp.RouteTables) > 0 {
 			break
 		}
 	}
@@ -160,7 +160,7 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	for i := 0; i < retry; i++ {
 		err := req.Send()
-		if err == nil {
+		if err == nil && len(resp.Reservations) > 0 {
 			break
 		}
 	}
@@ -213,7 +213,7 @@ func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string)
 	var err error
 	for i := 0; i < retry; i++ {
 		err := req.Send()
-		if err == nil {
+		if err == nil && len(resp.NetworkInterfaces) > 0 {
 			break
 		}
 	}
