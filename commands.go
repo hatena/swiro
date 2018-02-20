@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/taku-k/swiro/command"
+	"github.com/hatena/swiro/command"
 	"github.com/urfave/cli"
 )
 

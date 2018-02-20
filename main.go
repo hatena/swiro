@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/taku-k/swiro/build"
+	"github.com/hatena/swiro/build"
 	"github.com/urfave/cli"
 )
 
