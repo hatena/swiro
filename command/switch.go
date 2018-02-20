@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/Songmu/prompter"
-	"github.com/taku-k/swiro/aws"
+	"github.com/hatena/swiro/aws"
 	"github.com/urfave/cli"
 )
 

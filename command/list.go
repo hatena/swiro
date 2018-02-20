@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/taku-k/swiro/aws"
+	"github.com/hatena/swiro/aws"
 	"github.com/urfave/cli"
 )
 

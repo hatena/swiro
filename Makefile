@@ -4,8 +4,8 @@ VERSION := $(shell git describe --tags --exact-match 2> /dev/null || git rev-par
 SRCS    := $(shell find . -type f -name '*.go')
 LDFLAGS := -s -w -extldflags "-static"
 LDFLAGS += \
-	-X "github.com/taku-k/swiro/build.version=$(VERSION)" \
-	-X "github.com/taku-k/swiro/build.name=$(NAME)"
+	-X "github.com/hatena/swiro/build.version=$(VERSION)" \
+	-X "github.com/hatena/swiro/build.name=$(NAME)"
 
 .DEFAULT_GOAL := bin/$(NAME)
 
