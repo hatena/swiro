@@ -36,7 +36,7 @@ func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.Route
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(nil)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe route tables API", i, retry)
 		}
@@ -82,7 +82,7 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key strin
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe route tables API", i, retry)
 		}
@@ -110,7 +110,7 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, d
 	})
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): replace route API", i, retry)
 		}
@@ -168,7 +168,7 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string)
 	var err error
 	req, resp := c.ec2Svc.DescribeInstancesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe instances API", i, retry)
 		}
@@ -224,7 +224,7 @@ func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string)
 	req, resp := c.ec2Svc.DescribeNetworkInterfacesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe network interfaces API", i, retry)
 		}

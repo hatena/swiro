@@ -67,7 +67,7 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 	}
 
 	var changed string
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): confirm route table destination changes", i, retry)
 		}
