@@ -59,7 +59,7 @@ $ swiro switch -r route_table -v 10.0.0.1 -I dest_instance
 To install, use `go get`:
 
 ```bash
-$ go get -d github.com/taku-k/swiro
+$ go get -u github.com/taku-k/swiro
 ```
 
 ## Contribution
@@ -71,6 +71,21 @@ $ go get -d github.com/taku-k/swiro
 1. Run test suite with the `go test ./...` command and confirm that it passes
 1. Run `gofmt -s`
 1. Create a new Pull Request
+
+## Release
+
+Prerequisite:
+
+```bash
+$ go get github.com/tcnksm/ghr
+$ go get github.com/Songmu/ghch/cmd/ghch
+```
+
+When you'd like to release as v0.2.8:
+
+```bash
+$ ./release.sh v0.2.8
+```
 
 ## Author
 
