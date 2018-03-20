@@ -61,13 +61,23 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 	if err != nil {
 		return err
 	}
+	// Replace Route API may be delayed.  So, should not call it many times.
 	if err = t.e.replaceRoute(ctx, retry, routeTableId, destinationCidrBlock, instanceId); err != nil {
 		return err
 	}
 
-	changed, err := t.e.getInstanceIdByDest(ctx, retry, routeTableId, destinationCidrBlock)
-	if err != nil {
-		return err
+	var changed string
+	for i := 0; i < retry; i++ {
+		if i > 0 {
+			fmt.Printf("Retry (%v/%v): confirm route table destination changes", i, retry)
+		}
+		changed, err = t.e.getInstanceIdByDest(ctx, retry, retryWait, routeTableId, destinationCidrBlock)
+		if err != nil {
+			return err
+		}
+		if changed == instanceId {
+			break
+		}
 	}
 	if changed != instanceId {
 		return errors.New("Route has not been replaced yet")
