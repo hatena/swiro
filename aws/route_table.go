@@ -13,6 +13,9 @@ import (
 const timeOut = 3 * time.Second
 const retry = 3
 
+// retryWait wait millisecond for retry
+const retryWait = 200
+
 type RouteTable struct {
 	table *ec2.RouteTable
 	e     *Ec2Client
@@ -28,7 +31,7 @@ func NewRouteTables() ([]*RouteTable, error) {
 	defer cancel()
 
 	e := newEc2Client()
-	ec2Tables, err := e.getRouteTables(ctx, retry)
+	ec2Tables, err := e.getRouteTables(ctx, retry, retryWait)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +47,7 @@ func NewRouteTable(routeTableKey string) (*RouteTable, error) {
 	defer cancel()
 
 	e := newEc2Client()
-	ec2Table, err := e.getRouteTableByKey(ctx, retry, routeTableKey)
+	ec2Table, err := e.getRouteTableByKey(ctx, retry, retryWait, routeTableKey)
 	if err != nil {
 		return nil, err
 	}
@@ -57,12 +60,12 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 
 	routeTableId := *t.table.RouteTableId
 	destinationCidrBlock := fmt.Sprintf("%s/32", vip)
-	instanceId, err := t.e.getInstanceId(ctx, retry, instance)
+	instanceId, err := t.e.getInstanceId(ctx, retry, retryWait, instance)
 	if err != nil {
 		return err
 	}
 	// Replace Route API may be delayed.  So, should not call it many times.
-	if err = t.e.replaceRoute(ctx, retry, routeTableId, destinationCidrBlock, instanceId); err != nil {
+	if err = t.e.replaceRoute(ctx, retry, retryWait, routeTableId, destinationCidrBlock, instanceId); err != nil {
 		return err
 	}
 
@@ -78,6 +81,7 @@ func (t *RouteTable) ReplaceRoute(vip, instance string) error {
 		if changed == instanceId {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	if changed != instanceId {
 		return errors.New("Route has not been replaced yet")
@@ -101,7 +105,7 @@ func (t *RouteTable) ListPossibleVips() *MaybeVips {
 			if r.InstanceId != nil {
 				ids = append(ids, *r.InstanceId)
 				vips = append(vips, *r.DestinationCidrBlock)
-				name, err := t.e.getInstanceNameById(ctx, retry, *r.InstanceId)
+				name, err := t.e.getInstanceNameById(ctx, retry, retryWait, *r.InstanceId)
 				if err != nil {
 					name = "unknown"
 				}
@@ -124,12 +128,12 @@ func (t *RouteTable) GetSrcByVip(vip string) (*Ec2Meta, error) {
 	var name string
 	switch {
 	case strings.HasPrefix(id, "i-") && state == ec2.RouteStateActive:
-		name, err = t.e.getInstanceNameById(ctx, retry, id)
+		name, err = t.e.getInstanceNameById(ctx, retry, retryWait, id)
 		if err != nil {
 			return nil, err
 		}
 	case strings.HasPrefix(id, "eni-") && state == ec2.RouteStateActive:
-		name, err = t.e.getENINameById(ctx, retry, id)
+		name, err = t.e.getENINameById(ctx, retry, retryWait, id)
 		if err != nil {
 			return nil, err
 		}
