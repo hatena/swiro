@@ -81,7 +81,7 @@ $ go get github.com/tcnksm/ghr
 $ go get github.com/Songmu/ghch/cmd/ghch
 ```
 
-When you'd like to release as v0.2.8:
+When you'd like to release master branch as v0.2.8:
 
 ```bash
 $ ./release.sh v0.2.8
