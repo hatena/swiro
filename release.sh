@@ -8,6 +8,11 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+if [[ $(git symbolic-ref --short HEAD) != "master" ]]; then
+  echo "Your current branch should be master"
+  exit 1
+fi
+
 RELEASE_VERSION=$(echo $1 | sed 's/^\([0-9]\)/v\1/')
 
 echo "STEP1: tag the version"
