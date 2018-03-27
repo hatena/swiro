@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -32,11 +33,11 @@ func newEc2Client() *Ec2Client {
 	return &Ec2Client{ec2Svc: ec2Svc}
 }
 
-func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.RouteTable, error) {
+func (c *Ec2Client) getRouteTables(ctx context.Context, retry int, retryWait int) ([]*ec2.RouteTable, error) {
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(nil)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe route tables API", i, retry)
 		}
@@ -44,6 +45,7 @@ func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.Route
 		if err == nil && len(resp.RouteTables) > 0 {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	if err != nil || len(resp.RouteTables) < 1 {
 		return nil, err
@@ -52,7 +54,7 @@ func (c *Ec2Client) getRouteTables(ctx context.Context, retry int) ([]*ec2.Route
 	return resp.RouteTables, nil
 }
 
-func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key string) (*ec2.RouteTable, error) {
+func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, retryWait int, key string) (*ec2.RouteTable, error) {
 	var input *ec2.DescribeRouteTablesInput
 	if strings.HasPrefix(key, "rtb-") {
 		input = &ec2.DescribeRouteTablesInput{
@@ -82,7 +84,7 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key strin
 	req, resp := c.ec2Svc.DescribeRouteTablesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe route tables API", i, retry)
 		}
@@ -90,6 +92,7 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key strin
 		if err == nil && len(resp.RouteTables) > 0 {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	switch {
 	case err != nil:
@@ -102,7 +105,7 @@ func (c *Ec2Client) getRouteTableByKey(ctx context.Context, retry int, key strin
 	return resp.RouteTables[0], nil
 }
 
-func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, destinationCidrBlock, instanceId string) error {
+func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, retryWait int, routeTableId, destinationCidrBlock, instanceId string) error {
 	req, _ := c.ec2Svc.ReplaceRouteRequest(&ec2.ReplaceRouteInput{
 		RouteTableId:         aws.String(routeTableId),
 		InstanceId:           aws.String(instanceId),
@@ -110,7 +113,7 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, d
 	})
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): replace route API", i, retry)
 		}
@@ -118,6 +121,7 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, d
 		if err == nil {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	if err != nil {
 		return err
@@ -125,8 +129,8 @@ func (c *Ec2Client) replaceRoute(ctx context.Context, retry int, routeTableId, d
 	return nil
 }
 
-func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, retry int, routeTableId, dest string) (string, error) {
-	t, err := c.getRouteTableByKey(ctx, retry, routeTableId)
+func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, retry int, retryWait int, routeTableId, dest string) (string, error) {
+	t, err := c.getRouteTableByKey(ctx, retry, retryWait, routeTableId)
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +142,7 @@ func (c *Ec2Client) getInstanceIdByDest(ctx context.Context, retry int, routeTab
 	return "", errors.New("Not found")
 }
 
-func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string) (*ec2.Instance, error) {
+func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, retryWait int, key string) (*ec2.Instance, error) {
 	var input *ec2.DescribeInstancesInput
 	if strings.HasPrefix(key, "i-") {
 		input = &ec2.DescribeInstancesInput{
@@ -168,7 +172,7 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string)
 	var err error
 	req, resp := c.ec2Svc.DescribeInstancesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe instances API", i, retry)
 		}
@@ -176,6 +180,7 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string)
 		if err == nil && len(resp.Reservations) > 0 {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	switch {
 	case err != nil:
@@ -188,16 +193,16 @@ func (c *Ec2Client) getInstanceByKey(ctx context.Context, retry int, key string)
 	return resp.Reservations[0].Instances[0], nil
 }
 
-func (c *Ec2Client) getInstanceId(ctx context.Context, retry int, key string) (string, error) {
-	instance, err := c.getInstanceByKey(ctx, retry, key)
+func (c *Ec2Client) getInstanceId(ctx context.Context, retry int, retryWait int, key string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx, retry, retryWait, key)
 	if err != nil {
 		return "", err
 	}
 	return *instance.InstanceId, nil
 }
 
-func (c *Ec2Client) getInstanceNameById(ctx context.Context, retry int, instanceId string) (string, error) {
-	instance, err := c.getInstanceByKey(ctx, retry, instanceId)
+func (c *Ec2Client) getInstanceNameById(ctx context.Context, retry int, retryWait int, instanceId string) (string, error) {
+	instance, err := c.getInstanceByKey(ctx, retry, retryWait, instanceId)
 	if err != nil {
 		return "", err
 	}
@@ -209,7 +214,7 @@ func (c *Ec2Client) getInstanceNameById(ctx context.Context, retry int, instance
 	return "", nil
 }
 
-func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string) (string, error) {
+func (c *Ec2Client) getENINameById(ctx context.Context, retry int, retryWait int, ENIId string) (string, error) {
 	input := &ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -224,7 +229,7 @@ func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string)
 	req, resp := c.ec2Svc.DescribeNetworkInterfacesRequest(input)
 	req.HTTPRequest = req.HTTPRequest.WithContext(ctx)
 	var err error
-	for i := 0; i < retry; i++ {
+	for i := 0; i <= retry; i++ {
 		if i > 0 {
 			fmt.Printf("Retry (%v/%v): describe network interfaces API", i, retry)
 		}
@@ -232,6 +237,7 @@ func (c *Ec2Client) getENINameById(ctx context.Context, retry int, ENIId string)
 		if err == nil && len(resp.NetworkInterfaces) > 0 {
 			break
 		}
+		time.Sleep(time.Duration(i*retryWait) * time.Millisecond)
 	}
 	switch {
 	case err != nil:
